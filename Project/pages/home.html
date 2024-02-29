@@ -31,39 +31,28 @@
     <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
 			<div class="container-fluid">
 				<a class="navbar-brand" href="#">ING Hubs Turkey</a>
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
-					<span class="navbar-toggler-icon"></span>
-				</button>
-				<div class="collapse navbar-collapse" id="navbar">
-					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-						<li class="nav-item dropdown">
-							<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Employee</a>
-							<ul class="dropdown-menu">
-								<li><a id="employeeListButton" class="dropdown-item" href="#">Employee List</a></li>
-								<li><a id="addNewEmployeeButton" class="dropdown-item" href="#">Add New Employee</a></li>
-							</ul>
-						</li>
-					</ul>
-					<ul class="navbar-nav mb-2 mb-lg-0">
-						<li class="nav-item sign-in">
-							<button id="signInButton" class="btn btn-outline-light">Sign In</button>
-						</li>
-						<li class="nav-item sign-up">
-							<button id="signUpButton" class="btn btn-outline-light">Sign Up</button>
-						</li>
-						<li class="nav-item sign-out">
-							<button id="signOutButton" class="btn btn-outline-light" hidden>Sign Out</button>
-						</li>
-					</ul>
 			</div>
 	  </nav>
-		<div class="container">
-			<div class="card mt-4">
-				<div class="card-header bg-white">
-					<h3 class="card-title">Home</h3>
+		<div class="container-fluid">
+			<div class="row">
+				<div class="col-2 bg-light p-3">
+					<div class="mb-2">
+						<a class="link-underline link-underline-opacity-0 collapsed" href="#employeeMenu" data-bs-toggle="collapse">Employee</a>
+						<div id="employeeMenu" class="collapse ps-4">
+							<a class="link-underline link-underline-opacity-0" href="#">Employee List</a><br/>
+							<a class="link-underline link-underline-opacity-0" href="#">Add New Employee</a>
+						</div>
+					</div>
+					<div>
+						<a class="link-underline link-underline-opacity-0 collapsed" href="#candidateMenu" data-bs-toggle="collapse">Candidate</a>
+						<div id="candidateMenu" class="collapse ps-4">
+							<a class="link-underline link-underline-opacity-0" href="#">Candidate List</a><br/>
+							<a class="link-underline link-underline-opacity-0" href="#">Add New Candidate</a>
+						</div>
+					</div>
 				</div>
-				<div class="card-body">
-					<p class="mb-0">Welcome to ING Hubs Turkey home page!</p>
+				<div class="col-10 bg-white p-3">
+					<p>This is the main content...</p>
 				</div>
 			</div>
 		</div>
@@ -72,52 +61,7 @@
 			(function () {
 				"use strict";
 				
-				const navbarBrand = document.querySelector(".navbar-brand");
 				
-				const employeeListButton = document.querySelector("#employeeListButton");
-				const addNewEmployeeButton = document.querySelector("#addNewEmployeeButton");
-				
-				const signInButton = document.querySelector("#signInButton");
-				const signUpButton = document.querySelector("#signUpButton");
-				const signOutButton = document.querySelector("#signOutButton");
-				
-				window.onload = function () {
-					const isAuthenticated = localStorage.getItem("isAuthenticated") === "1";
-					if (isAuthenticated) {
-						signInButton.setAttribute("hidden", "");
-						signUpButton.setAttribute("hidden", "");
-						signOutButton.removeAttribute("hidden");
-					} else {
-						signInButton.removeAttribute("hidden");
-						signUpButton.removeAttribute("hidden");
-						signOutButton.setAttribute("hidden", "");
-					}
-				};
-				
-				navbarBrand.onclick = function () {
-					location.href = "./home.html";
-				};
-				
-				employeeListButton.onclick = function () {
-					location.href = "./employee-list.html";
-				};
-				
-				addNewEmployeeButton.onclick = function () {
-					location.href = "./home.html";
-				};
-				
-				signInButton.onclick = function () {
-					location.href = "./sign-in.html";
-				};
-				
-				signUpButton.onclick = function () {
-					location.href = "./sign-up.html";
-				};
-				
-				signOutButton.onclick = function () {
-					localStorage.removeItem("isAuthenticated");
-					location.href = "./home.html";
-				};
 			})();
 		</script>
   </body>
