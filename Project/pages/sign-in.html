@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Project</title>
+		<link rel="stylesheet" href="../css/bootstrap.min.css" />
+		<style type="text/css">
+			body {
+				background-image: url("../img/background.jpg");
+			}
+			
+			@media (min-width: 992px) {
+				#signUpButton, #signOutButton {
+					margin-left: 10px;
+				}
+			}
+			
+			@media (max-width: 991px) {
+				#signUpButton, #signOutButton {
+					margin-top: 10px;
+				}
+			}
+			
+			#signInButton, #signUpButton, #signOutButton {
+				width: 90px;
+			}
+		</style>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-lg bg-primary" data-bs-theme="dark">
+			<div class="container-fluid">
+				<a class="navbar-brand" href="#">ING Hubs Turkey</a>
+				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar">
+					<span class="navbar-toggler-icon"></span>
+				</button>
+				<div class="collapse navbar-collapse" id="navbar">
+					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+						<li class="nav-item dropdown">
+							<a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">Employee</a>
+							<ul class="dropdown-menu">
+								<li><a class="dropdown-item" href="#">Employee List</a></li>
+								<li><a class="dropdown-item" href="#">Add New Employee</a></li>
+							</ul>
+						</li>
+					</ul>
+					<ul class="navbar-nav mb-2 mb-lg-0">
+						<li class="nav-item sign-in">
+							<button id="signInButton" class="btn btn-outline-light">Sign In</button>
+						</li>
+						<li class="nav-item sign-up">
+							<button id="signUpButton" class="btn btn-outline-light">Sign Up</button>
+						</li>
+						<li class="nav-item sign-out">
+							<button id="signOutButton" class="btn btn-outline-light" hidden>Sign Out</button>
+						</li>
+					</ul>
+			</div>
+	  </nav>
+		<div class="container">
+			<div class="card mt-5">
+				<div class="card-header bg-white">
+					<h3 class="card-title">Sign In</h3>
+				</div>
+				<div class="card-body">
+					<form>
+						<div class="mb-3">
+							<label for="emailInput" class="form-label">Email</label>
+							<input type="email" class="form-control" id="emailInput" maxlength="100" autocomplete="off" spellcheck="false">
+							<div class="invalid-feedback" id="emailFeedback"></div>
+						</div>
+						<div class="mb-3">
+							<label for="passwordInput" class="form-label">Password</label>
+							<input type="password" class="form-control" id="passwordInput" maxlength="6" autocomplete="off" spellcheck="false">
+							<div class="invalid-feedback" id="passwordFeedback"></div>
+						</div>
+						<button type="submit" class="btn btn-primary" id="submitButton">Submit</button>
+					</form>
+				</div>
+			</div>
+		</div>
+		<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+		<script type="text/javascript">
+			(function () {
+				"use strict";
+				
+				const navbarBrand = document.querySelector(".navbar-brand");
+				const signInButton = document.querySelector("#signInButton");
+				const signUpButton = document.querySelector("#signUpButton");
+				const signOutButton = document.querySelector("#signOutButton");
+				const emailInput = document.querySelector("#emailInput");
+				const emailFeedback = document.querySelector("#emailFeedback");
+				const passwordInput = document.querySelector("#passwordInput");
+				const passwordFeedback = document.querySelector("#passwordFeedback");
+				const submitButton = document.querySelector("#submitButton");
+				
+				navbarBrand.onclick = function () {
+					location.href = "./home.html";
+				};
+				
+				signInButton.onclick = function () {
+					location.href = "./sign-in.html";
+				};
+				
+				signUpButton.onclick = function () {
+					location.href = "./sign-up.html";
+				};
+				
+				emailInput.onchange = function () {
+					validateEmail();
+				};
+				
+				passwordInput.onchange = function () {
+					validatePassword();
+				};
+				
+				passwordInput.oninput = function (event) {
+					if (isNaN(parseInt(event.srcElement.value))) {
+						event.srcElement.value = event.srcElement.value.replace(/[^0-9\.]/g,'');
+					}
+				};
+				
+				submitButton.onclick = function (event) {
+					event.preventDefault();
+					validateEmail();
+					validatePassword();
+					if (isValidForm()) {
+						localStorage.setItem("isAuthenticated", "1");
+						location.href = "./home.html";
+					}
+				};
+				
+				function validateEmail() {
+					const email = emailInput.value.trim();
+					if (email.length === 0) {
+						emailInput.classList.add("is-invalid");
+						emailFeedback.innerText = "Please enter your email.";
+					} else if (!email.match(/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/)) {
+						emailInput.classList.add("is-invalid");
+						emailFeedback.innerText = "Please enter a valid email.";
+					} else {
+						emailInput.classList.remove("is-invalid");
+						emailFeedback.innerText = "";
+					}
+				};
+				
+				function validatePassword() {
+					const password = passwordInput.value.trim();
+					if (password.length === 0) {
+						passwordInput.classList.add("is-invalid");
+						passwordFeedback.innerText = "Please enter your password.";
+					} else if (password.length != 6) {
+						passwordInput.classList.add("is-invalid");
+						passwordFeedback.innerText = "Password must be 6 digits in length.";
+					} else {
+						passwordInput.classList.remove("is-invalid");
+						passwordFeedback.innerText = "";
+					}
+				};
+				
+				function isValidForm() {
+					return !emailInput.classList.contains("is-invalid") && !passwordInput.classList.contains("is-invalid");
+				};
+			})();
+		</script>
+  </body>
+</html>
