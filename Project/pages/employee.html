@@ -38,7 +38,7 @@
 				<a class="navbar-brand" href="./home.html">ING Hubs Turkey</a>
 			</div>
 	  </nav>
-		<div class="container">
+		<div class="container-fluid">
 			<div class="row">
 				<div class="col-2 bg-light p-4">
 					<div class="mb-2">
@@ -78,34 +78,27 @@
 						</div>
 						<div class="mb-3">
 							<label for="phoneInput" class="form-label">Phone Number</label>
-							<input type="text" class="form-control" id="phoneInput" maxlength="6" autocomplete="off" spellcheck="false">
+							<input type="text" class="form-control" id="phoneInput" maxlength="13" autocomplete="off" spellcheck="false">
 							<div class="invalid-feedback" id="phoneFeedback"></div>
 						</div>
-						<button type="submit" class="btn btn-primary" id="createButton">Create</button>
+						<button type="submit" class="btn btn-primary" id="saveButton">Save</button>
 					</form>
-				</div>
-				<div class="col-3 bg-light p-4" hidden>
-					<div class="card text-bg-light mb-3">
-						<div class="card-header">Header</div>
-						<div class="card-body">
-							<h5 class="card-title">Light card title</h5>
-							<p class="card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-						</div>
-					</div>
-					<div class="card text-bg-light mb-3">
-						<div class="card-header">Header</div>
-						<div class="card-body">
-							<h5 class="card-title">Light card title</h5>
-							<p class="card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>
+		<div id="loaderBg" hidden style="background: rgba(0,0,0,.4); position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; z-index: 1; display: flex; justify-content: center; align-items: center;"></div>
+		<div id="loaderIcon" hidden style="position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; z-index: 1; display: flex; justify-content: center; align-items: center;">
+			<img src="../img/loading.gif" width="125" height="125" />
+		</div>
 		<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="../js/sweetalert.min.js"></script>
+		<script type="text/javascript" src="../js/imask.js"></script>
 		<script type="text/javascript">
 			(function () {
 				"use strict";
+				
+				seedEmployeeData();
+				
 				document.querySelectorAll("a.link-underline + div > a.link-underline").forEach(function (element) {
 					element.addEventListener("click", function () {
 						document.querySelectorAll("a.link-underline + div > a.link-underline.active").forEach(function (element) {
@@ -114,6 +107,144 @@
 						this.classList.add("active");
 					});
 				});
+				
+				document.querySelector("#firstNameInput").addEventListener("change", function () {
+					validateFirstName();
+				});
+				
+				document.querySelector("#lastNameInput").addEventListener("change", function () {
+					validateLastName();
+				});
+				
+				document.querySelector("#emailInput").addEventListener("change", function () {
+					validateEmailAddress();
+				});
+				
+				IMask(document.querySelector("#phoneInput"), { mask: "000 000 00 00" });
+				
+				document.querySelector("#phoneInput").addEventListener("change", function () {
+					validatePhoneNumber();
+				});
+				
+				document.querySelector("#saveButton").addEventListener("click", function (event) {
+					event.preventDefault();
+					validateFirstName();
+					validateLastName();
+					validateEmailAddress();
+					validatePhoneNumber();
+					if (isValidForm()) {
+						showLoader();
+						const employeeList = JSON.parse(sessionStorage.getItem("employeeList"));
+						employeeList.push({
+							id: employeeList.length === 0 ? "1001" : (parseInt(employeeList[employeeList.length - 1].id) + 1).toString(),
+							fullName: document.querySelector("#firstNameInput").value.trim() + " " + document.querySelector("#lastNameInput").value.trim(),
+							email: document.querySelector("#emailInput").value.trim(),
+							phone: document.querySelector("#phoneInput").value.trim()
+						});
+						sessionStorage.setItem("employeeList", JSON.stringify(employeeList));
+						const timeoutId = setTimeout(function () {
+							hideLoader();
+							clearTimeout(timeoutId);
+							Swal.fire({
+								title: "Success",
+								text: "Operation completed successfully!",
+								icon: "success"
+							}).then(function (result) {
+								if (result.isConfirmed) {
+									location.href = "./employee-list.html";
+								}
+							});
+						}, 1500);
+					} else {
+						document.querySelector("form .is-invalid").focus();
+					}
+				});
+				
+				function seedEmployeeData() {
+					if (!JSON.parse(sessionStorage.getItem("employeeList"))) {
+						sessionStorage.setItem("employeeList", JSON.stringify([
+								{ id: "1001", fullName: "Employee 01", email: "emp01@mail.com", phone: "111 111 11 01" },
+								{ id: "1002", fullName: "Employee 02", email: "emp02@mail.com", phone: "111 111 11 02" },
+								{ id: "1003", fullName: "Employee 03", email: "emp03@mail.com", phone: "111 111 11 03" },
+								{ id: "1004", fullName: "Employee 04", email: "emp04@mail.com", phone: "111 111 11 04" },
+								{ id: "1005", fullName: "Employee 05", email: "emp05@mail.com", phone: "111 111 11 05" },
+								{ id: "1006", fullName: "Employee 06", email: "emp06@mail.com", phone: "111 111 11 06" },
+								{ id: "1007", fullName: "Employee 07", email: "emp07@mail.com", phone: "111 111 11 07" },
+								{ id: "1008", fullName: "Employee 08", email: "emp08@mail.com", phone: "111 111 11 08" },
+								{ id: "1009", fullName: "Employee 09", email: "emp09@mail.com", phone: "111 111 11 09" },
+								{ id: "1010", fullName: "Employee 10", email: "emp10@mail.com", phone: "111 111 11 10" },
+								{ id: "1011", fullName: "Employee 11", email: "emp11@mail.com", phone: "111 111 11 11" },
+								{ id: "1012", fullName: "Employee 12", email: "emp12@mail.com", phone: "111 111 11 12" },
+								{ id: "1013", fullName: "Employee 13", email: "emp13@mail.com", phone: "111 111 11 13" },
+								{ id: "1014", fullName: "Ervin Onur", email: "ervinonur@mail.com", phone: "545 886 01 95" },
+							])
+						);
+					}
+				};
+				
+				function validateFirstName() {
+					const firstName = document.querySelector("#firstNameInput").value.trim();
+					if (firstName.length === 0) {
+						document.querySelector("#firstNameInput").classList.add("is-invalid");
+						document.querySelector("#firstNameFeedback").innerText = "Please enter the employee's first name.";
+					} else {
+						document.querySelector("#firstNameInput").classList.remove("is-invalid");
+						document.querySelector("#firstNameFeedback").innerText = "";
+					}
+				};
+				
+				function validateLastName() {
+					const lastName = document.querySelector("#lastNameInput").value.trim();
+					if (lastName.length === 0) {
+						document.querySelector("#lastNameInput").classList.add("is-invalid");
+						document.querySelector("#lastNameFeedback").innerText = "Please enter the employee's last name.";
+					} else {
+						document.querySelector("#lastNameInput").classList.remove("is-invalid");
+						document.querySelector("#lastNameFeedback").innerText = "";
+					}
+				};
+				
+				function validateEmailAddress() {
+					const emailAddress = document.querySelector("#emailInput").value.trim();
+					if (emailAddress.length === 0) {
+						document.querySelector("#emailInput").classList.add("is-invalid");
+						document.querySelector("#emailFeedback").innerText = "Please enter the employee's email address.";
+					} else if (!emailAddress.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/)) {
+						document.querySelector("#emailInput").classList.add("is-invalid");
+						document.querySelector("#emailFeedback").innerText = "Please enter a valid email address.";
+					} else {
+						document.querySelector("#emailInput").classList.remove("is-invalid");
+						document.querySelector("#emailFeedback").innerText = "";
+					}
+				};
+				
+				function validatePhoneNumber() {
+					const phoneNumber = document.querySelector("#phoneInput").value.trim();
+					if (phoneNumber.length === 0) {
+						document.querySelector("#phoneInput").classList.add("is-invalid");
+						document.querySelector("#phoneFeedback").innerText = "Please enter the employee's phone number.";
+					} else if (!phoneNumber.match(/^[1-9]\d{2}\s\d{3}\s\d{2}\s\d{2}/)) {
+						document.querySelector("#phoneInput").classList.add("is-invalid");
+						document.querySelector("#phoneFeedback").innerText = "Please enter a valid phone number.";
+					} else {
+						document.querySelector("#phoneInput").classList.remove("is-invalid");
+						document.querySelector("#phoneFeedback").innerText = "";
+					}
+				};
+				
+				function isValidForm() {
+					return document.querySelectorAll("form .is-invalid").length === 0;
+				};
+				
+				function showLoader() {
+					document.querySelector("#loaderBg").removeAttribute("hidden");
+					document.querySelector("#loaderIcon").removeAttribute("hidden");
+				};
+				
+				function hideLoader() {
+					document.querySelector("#loaderBg").setAttribute("hidden", "");
+					document.querySelector("#loaderIcon").setAttribute("hidden", "");
+				};
 			})();
 		</script>
   </body>
