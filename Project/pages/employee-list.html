@@ -38,7 +38,7 @@
 				<a class="navbar-brand" href="./home.html">ING Hubs Turkey</a>
 			</div>
 	  </nav>
-		<div class="container">
+		<div class="container-fluid">
 			<div class="row">
 				<div class="col-2 bg-light p-4">
 					<div class="mb-2">
@@ -59,74 +59,186 @@
 					</div>
 				</div>
 				<div class="col-10 bg-white p-4">
-					<h3 class="border-bottom mb-4 pb-2">Employee List</h3>
+					<h3 class="border-bottom mb-4 pb-2">
+						<span>Employee List</span>
+						<input type="text" id="searchbox" hidden class="form-control" autocomplete="off" placeholder="Search" spellcheck="false" style="display: inline; width: 250px; float: right; position: relative; top: -2px;" />
+					</h3>
 					<table class="table table-hover">
 						<thead>
 							<tr>
-								<th class="bg-light">Full Name</th>
-								<th class="bg-light">Email Address</th>
-								<th class="bg-light">Phone Number</th>
+								<th class="bg-light"><span data-sort-by="fullName" style="cursor: pointer;">Employee ID</span></th>
+								<th class="bg-light"><span data-sort-by="fullName" style="cursor: pointer;">Full Name</span></th>
+								<th class="bg-light"><span data-sort-by="email" style="cursor: pointer;">Email Address</span></th>
+								<th class="bg-light"><span data-sort-by="phone" style="cursor: pointer;">Phone Number</span></th>
 							</tr>
 						</thead>
-						<tbody>
-							<tr>
-								<td>John Connor</td>
-								<td>jconnor@domain.com</td>
-								<td>111 111 11 11</td>
-							</tr>
-							<tr>
-								<td>Sarah Connor</td>
-								<td>sconnor@domain.com</td>
-								<td>222 222 22 22</td>
-							</tr>
-							<tr>
-								<td>Cameron Phillips</td>
-								<td>cphillips@domain.com</td>
-								<td>333 333 33 33</td>
-							</tr>
-							<tr>
-								<td>Derek Reese</td>
-								<td>dreese@domain.com</td>
-								<td>444 444 44 44</td>
-							</tr>
-							<tr>
-								<td>Kyle Reese</td>
-								<td>kreese@domain.com</td>
-								<td>555 555 55 55</td>
-							</tr>
-						</tbody>
+						<tbody></tbody>
 					</table>
-				</div>
-				<div class="col-3 bg-light p-4">
-					<div class="card text-bg-light mb-3">
-						<div class="card-header">Header</div>
-						<div class="card-body">
-							<h5 class="card-title">Light card title</h5>
-							<p class="card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-						</div>
-					</div>
-					<div class="card text-bg-light mb-3">
-						<div class="card-header">Header</div>
-						<div class="card-body">
-							<h5 class="card-title">Light card title</h5>
-							<p class="card-text">Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book.</p>
-						</div>
-					</div>
+					<nav class="text-center">
+						<ul class="pagination" hidden style="display: block;">
+							<li class="page-item" style="display: inline-block;"><a class="page-link" href="#" data-idx="0" style="display: inline-block;"><<</a></li>
+							<li class="page-item" style="display: inline-block;"><a class="page-link" href="#" data-idx="1" style="display: inline-block;"><</a></li>
+							<li class="page-item" style="display: inline-block;"><span style="display: inline-block;"></span></li>
+							<li class="page-item" style="display: inline-block;"><a class="page-link" href="#" data-idx="2" style="display: inline-block;">></a></li>
+							<li class="page-item" style="display: inline-block;"><a class="page-link" href="#" data-idx="3" style="display: inline-block;">>></a></li>
+						</ul>
+					</nav>
 				</div>
 			</div>
+		</div>
+		<div id="loaderBg" hidden style="background: rgba(0,0,0,.4); position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; z-index: 1; display: flex; justify-content: center; align-items: center;"></div>
+		<div id="loaderIcon" hidden style="position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; z-index: 1; display: flex; justify-content: center; align-items: center;">
+			<img src="../img/loading.gif" width="125" height="125" />
 		</div>
 		<script type="text/javascript" src="../js/bootstrap.min.js"></script>
 		<script type="text/javascript">
 			(function () {
 				"use strict";
-				document.querySelectorAll("a.link-underline + div > a.link-underline").forEach(function (element) {
-					element.addEventListener("click", function () {
-						document.querySelectorAll("a.link-underline + div > a.link-underline.active").forEach(function (element) {
-							element.classList.remove("active");
+				
+				seedEmployeeData();
+				
+				const employeeListStatic = JSON.parse(sessionStorage.getItem("employeeList"));
+				const pageSize = 5;
+				
+				let employeeListDynamic = employeeListStatic;
+				let sortDir = "asc";
+				let pageIndex = 0;
+				let pageCount = parseInt(employeeListStatic.length / pageSize) + ((employeeListStatic.length % pageSize) > 0 ? 1 : 0);
+				
+				initMenu();
+				showLoader();
+				
+				const timeoutId = setTimeout(function () {
+					initTable();
+					initSearchBox();
+					initPagination();
+					hideLoader();
+					clearTimeout(timeoutId);
+				}, 1500);
+				
+				function seedEmployeeData() {
+					if (!JSON.parse(sessionStorage.getItem("employeeList"))) {
+						sessionStorage.setItem("employeeList", JSON.stringify([
+								{ id: "1001", fullName: "Employee 01", email: "emp01@mail.com", phone: "111 111 11 01" },
+								{ id: "1002", fullName: "Employee 02", email: "emp02@mail.com", phone: "111 111 11 02" },
+								{ id: "1003", fullName: "Employee 03", email: "emp03@mail.com", phone: "111 111 11 03" },
+								{ id: "1004", fullName: "Employee 04", email: "emp04@mail.com", phone: "111 111 11 04" },
+								{ id: "1005", fullName: "Employee 05", email: "emp05@mail.com", phone: "111 111 11 05" },
+								{ id: "1006", fullName: "Employee 06", email: "emp06@mail.com", phone: "111 111 11 06" },
+								{ id: "1007", fullName: "Employee 07", email: "emp07@mail.com", phone: "111 111 11 07" },
+								{ id: "1008", fullName: "Employee 08", email: "emp08@mail.com", phone: "111 111 11 08" },
+								{ id: "1009", fullName: "Employee 09", email: "emp09@mail.com", phone: "111 111 11 09" },
+								{ id: "1010", fullName: "Employee 10", email: "emp10@mail.com", phone: "111 111 11 10" },
+								{ id: "1011", fullName: "Employee 11", email: "emp11@mail.com", phone: "111 111 11 11" },
+								{ id: "1012", fullName: "Employee 12", email: "emp12@mail.com", phone: "111 111 11 12" },
+								{ id: "1013", fullName: "Employee 13", email: "emp13@mail.com", phone: "111 111 11 13" },
+								{ id: "1014", fullName: "Ervin Onur", email: "ervinonur@mail.com", phone: "545 886 01 95" },
+							])
+						);
+					}
+				};
+				
+				function initMenu() {
+					document.querySelectorAll("a.link-underline + div > a.link-underline").forEach(function (element) {
+						element.addEventListener("click", function () {
+							document.querySelectorAll("a.link-underline + div > a.link-underline.active").forEach(function (element) {
+								element.classList.remove("active");
+							});
+							this.classList.add("active");
 						});
-						this.classList.add("active");
 					});
-				});
+				};
+				
+				function initTable() {
+					document.querySelectorAll(".table > thead > tr > th > span").forEach(function (element) {
+						element.addEventListener("click", function () {
+							employeeListDynamic.sort(function (e1, e2) {
+								const sortBy = element.attributes["data-sort-by"].value;
+								if (e1[sortBy] < e2[sortBy]) return sortDir === "asc" ? 1 : -1;
+								if (e1[sortBy] > e2[sortBy]) return sortDir === "asc" ? -1 : 1;
+								return 0;
+							});
+							if (sortDir === "asc") sortDir = "desc";
+							else if (sortDir === "desc") sortDir = "asc";
+							else sortDir = "asc";
+							dataBind();
+						});
+					});
+					dataBind();
+				};
+				
+				function initSearchBox() {
+					document.querySelector("#searchbox").addEventListener("input", function (event) {
+						employeeListDynamic = employeeListStatic.filter(function (employee) {
+							let result = false;
+							for (let key of Object.keys(employee)) {
+								if (employee[key].toLowerCase().indexOf(event.srcElement.value.toLowerCase()) >= 0) {
+									employeeListDynamic.sort(function (e1, e2) {
+										const sortBy = "desc";
+										if (e1[sortBy] < e2[sortBy]) return sortDir === "asc" ? 1 : -1;
+										if (e1[sortBy] > e2[sortBy]) return sortDir === "asc" ? -1 : 1;
+										return 0;
+									});
+									if (sortDir === "asc") sortDir = "desc";
+									else if (sortDir === "desc") sortDir = "asc";
+									else sortDir = "asc";
+									result = true;
+									break;
+								}
+							}
+							return result;
+						});
+						pageIndex = 0;
+						dataBind();
+					});
+					if (document.querySelector("#searchbox").hasAttribute("hidden")) {
+						document.querySelector("#searchbox").removeAttribute("hidden");
+					}
+				};
+				
+				function initPagination() {
+					document.querySelector(".pagination > .page-item > span").innerText = pageIndex + 1 + " / " + pageCount;
+					document.querySelectorAll(".pagination > .page-item > .page-link").forEach(function (element, index) {
+						element.addEventListener("click", function () {
+							switch (index) {
+								case 0: pageIndex = 0; break;
+								case 1: pageIndex--; break;
+								case 2: pageIndex++; break;
+								case 3: pageIndex = pageCount - 1; break;
+							}
+							if (pageIndex < 0) pageIndex = 0;
+							if (pageIndex > pageCount - 1) pageIndex = pageCount - 1;
+							dataBind();
+						});
+					});	
+					if (document.querySelector(".pagination").hasAttribute("hidden")) {
+						document.querySelector(".pagination").removeAttribute("hidden");
+					}
+				};
+				
+				function dataBind() {
+					let rows = "";
+					employeeListDynamic.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize).forEach(function (employee) {
+						rows += "<tr>";
+						for (let key of Object.keys(employee)) {
+							rows += "<td>" + employee[key] + "</td>";
+						}
+						rows += "</tr>";
+					});
+					document.querySelector(".table > tbody").innerHTML = rows;
+					pageCount = parseInt(employeeListDynamic.length / pageSize) + ((employeeListDynamic.length % pageSize) > 0 ? 1 : 0);
+					document.querySelector(".pagination > .page-item > span").innerText = pageIndex + 1 + " / " + pageCount;
+				};
+				
+				function showLoader() {
+					document.querySelector("#loaderBg").removeAttribute("hidden");
+					document.querySelector("#loaderIcon").removeAttribute("hidden");
+				};
+				
+				function hideLoader() {
+					document.querySelector("#loaderBg").setAttribute("hidden", "");
+					document.querySelector("#loaderIcon").setAttribute("hidden", "");
+				};
 			})();
 		</script>
   </body>
