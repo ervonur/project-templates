@@ -70,6 +70,7 @@
 								<th class="bg-light"><span data-sort-by="fullName" style="cursor: pointer;">Full Name</span></th>
 								<th class="bg-light"><span data-sort-by="email" style="cursor: pointer;">Email Address</span></th>
 								<th class="bg-light"><span data-sort-by="phone" style="cursor: pointer;">Phone Number</span></th>
+								<th class="bg-light"></th>
 							</tr>
 						</thead>
 						<tbody></tbody>
@@ -90,17 +91,19 @@
 		<div id="loaderIcon" hidden style="position: absolute; width: 100%; height: 100%; top: 0px; left: 0px; z-index: 1; display: flex; justify-content: center; align-items: center;">
 			<img src="../img/loading.gif" width="125" height="125" />
 		</div>
-		<script type="text/javascript" src="../js/bootstrap.min.js"></script>
+		<script type="text/javascript" src="../js/bootstrap.js"></script>
+		<script type="text/javascript" src="../js/sweetalert.js"></script>
 		<script type="text/javascript">
 			(function () {
 				"use strict";
 				
 				seedEmployeeData();
 				
-				const employeeListStatic = JSON.parse(sessionStorage.getItem("employeeList"));
 				const pageSize = 5;
 				
+				let employeeListStatic = JSON.parse(sessionStorage.getItem("employeeList"));
 				let employeeListDynamic = employeeListStatic;
+				
 				let sortDir = "asc";
 				let pageIndex = 0;
 				let pageCount = parseInt(employeeListStatic.length / pageSize) + ((employeeListStatic.length % pageSize) > 0 ? 1 : 0);
@@ -218,17 +221,72 @@
 				
 				function dataBind() {
 					let rows = "";
+					let columnCount = document.querySelectorAll(".table > thead > tr > th").length;
 					employeeListDynamic.slice(pageIndex * pageSize, pageIndex * pageSize + pageSize).forEach(function (employee) {
+						let index = 0;
 						rows += "<tr>";
 						for (let key of Object.keys(employee)) {
 							rows += "<td>" + employee[key] + "</td>";
+							index++;
+							if (index == columnCount - 1) {
+								rows += "<td><button class='btn btn-danger' data-id='" + employee['id'] + "'>Remove</button>";
+							}
 						}
 						rows += "</tr>";
 					});
 					document.querySelector(".table > tbody").innerHTML = rows;
 					pageCount = parseInt(employeeListDynamic.length / pageSize) + ((employeeListDynamic.length % pageSize) > 0 ? 1 : 0);
 					document.querySelector(".pagination > .page-item > span").innerText = pageIndex + 1 + " / " + pageCount;
+					initRemoveButtons();
 				};
+				
+				function initRemoveButtons() {
+					let removeButton = null;
+					document.querySelectorAll(".table .btn-danger").forEach(function (element) {
+						element.addEventListener("click", function () {
+							removeButton = this;
+							Swal.fire({
+								icon: "warning",
+								text: "Do you want to remove this employee record?",
+								showCancelButton: true,
+								confirmButtonText: "Remove",
+								confirmButtonColor: "#dc3545",
+								focusCancel: true
+							}).then((result) => {
+								if (result.isConfirmed) {
+									showLoader();
+									let index = -1;
+									for (let i = 0; i < employeeListStatic.length; i++) {
+										if (employeeListStatic[i]["id"] === removeButton.attributes["data-id"].value) {
+											index = i;
+											break;
+										}
+									}
+									if (index >= 0) {
+										employeeListStatic.splice(index, 1);
+										sessionStorage.setItem("employeeList", JSON.stringify(employeeListStatic));
+									}
+									index = -1;
+									for (let i = 0; i < employeeListDynamic.length; i++) {
+										if (employeeListDynamic[i]["id"] === removeButton.attributes["data-id"].value) {
+											index = i;
+											break;
+										}
+									}
+									if (index >= 0) {
+										employeeListDynamic.splice(index, 1);
+									}
+									const timeoutId = setTimeout(function () {
+										dataBind();
+										hideLoader();
+										clearTimeout(timeoutId);
+										Swal.fire("Operation completed successfully!", "", "success");
+									}, 1000);
+								}
+							});
+						});
+					});
+				}
 				
 				function showLoader() {
 					document.querySelector("#loaderBg").removeAttribute("hidden");
